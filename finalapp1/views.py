@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 
 def register(request):
     if request.method == 'POST':
@@ -12,25 +13,15 @@ def register(request):
 
 def login(request):
     if request.method == 'POST':
-        authenticate(request)
-        return redirect('dashboard')  
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            return redirect('dashboard')
+        else:
+            return render(request, 'login.html', {'error_message': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
 
-    
-def authenticate(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = User.objects.get(username=username)
-        if user.check_password(password):
-            return redirect('dashboard')
-        else:
-            return redirect('login')
-    return render(request, 'login.html')
-
-
 def dashboard(request):
     return render(request, 'dashboard.html')
-
-
